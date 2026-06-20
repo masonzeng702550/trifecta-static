@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trifecta-static"
+version = "0.1.0"
+description = "Static analyzer that detects Simon Willison's lethal trifecta in AI agent codebases before deployment"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "MasonZeng" }]
+keywords = ["security", "ai-agents", "prompt-injection", "lethal-trifecta", "sast", "sarif"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3",
+]
+
+# Core analysis is dependency-free (stdlib ast, json, argparse) so it runs
+# anywhere in CI without an install dance. The optional LLM-assisted classifier
+# is the only thing that needs an SDK, and it is lazily imported.
+dependencies = []
+
+[project.optional-dependencies]
+llm = ["anthropic>=0.39.0"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+trifecta = "trifecta.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/masonzeng702550/trifecta-static"
+Issues = "https://github.com/masonzeng702550/trifecta-static/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
