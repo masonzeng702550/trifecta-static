@@ -1,7 +1,13 @@
 name: trifecta-scan
 
-# Example self-scan: gate pull requests on lethal-trifecta findings and publish
-# results to GitHub Code Scanning. Point --path at your agent code.
+# Example integration workflow: run Trifecta-Static over agent code, publish a
+# SARIF report, and (where GitHub Advanced Security is available) surface it in
+# Code Scanning. Here it scans the bundled fixtures, which intentionally contain
+# a known-critical trifecta, so the gate step is run non-blocking for the demo.
+#
+# In a real pipeline you would drop `continue-on-error` so that `--fail-on`
+# blocks the merge:
+#   trifecta scan ./agent --depth deep --fail-on high
 on:
   pull_request:
   push:
@@ -20,15 +26,25 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e .
-      - name: Run Trifecta-Static
-        run: >
-          trifecta scan tests/fixtures
-          --depth deep
-          --format sarif
-          -o trifecta.sarif
-          --fail-on critical
-      - name: Upload SARIF
+
+      - name: Run Trifecta-Static (SARIF)
+        run: trifecta scan tests/fixtures --depth deep --format sarif -o trifecta.sarif
+
+      - name: Show findings (gate demo, non-blocking on fixtures)
+        continue-on-error: true
+        run: trifecta scan tests/fixtures --depth deep --fail-on critical
+
+      - name: Publish SARIF as a build artifact
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trifecta-sarif
+          path: trifecta.sarif
+
+      # Best-effort: only works when Code Scanning / GHAS is enabled.
+      - name: Upload SARIF to Code Scanning
+        if: always()
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trifecta.sarif
