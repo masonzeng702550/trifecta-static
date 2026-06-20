@@ -28,6 +28,9 @@ jobs:
       - run: pip install -e .
 
       - name: Run Trifecta-Static (SARIF)
+        # Report generation only: the exit code still reflects findings, so keep
+        # it non-gating here. The gate behaviour is shown in the next step.
+        continue-on-error: true
         run: trifecta scan tests/fixtures --depth deep --format sarif -o trifecta.sarif
 
       - name: Show findings (gate demo, non-blocking on fixtures)
