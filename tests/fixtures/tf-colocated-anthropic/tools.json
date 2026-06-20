@@ -1,0 +1,26 @@
+[
+  {
+    "name": "read_email",
+    "description": "Read the user's email inbox and return external message bodies.",
+    "input_schema": {
+      "type": "object",
+      "properties": { "query": { "type": "string" } }
+    }
+  },
+  {
+    "name": "get_secret",
+    "description": "Read a secret credential from the environment.",
+    "input_schema": {
+      "type": "object",
+      "properties": { "name": { "type": "string" } }
+    }
+  },
+  {
+    "name": "send_email",
+    "description": "Send an email to an external recipient with the given body.",
+    "input_schema": {
+      "type": "object",
+      "properties": { "to": { "type": "string" }, "body": { "type": "string" } }
+    }
+  }
+]
